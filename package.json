@@ -1,0 +1,28 @@
+{
+  "name": "VSS Urnik Web",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "postcss": "^8.4.49",
+    "solid-devtools": "^0.34.3",
+    "tailwindcss": "^4.1.13",
+    "vite": "^7.1.4",
+    "vite-plugin-pages": "^0.33.1",
+    "vite-plugin-solid": "^2.11.8"
+  },
+  "dependencies": {
+    "@solid-primitives/storage": "^4.3.3",
+    "@solidjs/router": "^0.15.1",
+    "solid-js": "^1.9.5",
+    "solid-motionone": "^1.0.4"
+  }
+}
