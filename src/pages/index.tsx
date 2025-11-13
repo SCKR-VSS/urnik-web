@@ -9,6 +9,7 @@ import { Presence } from 'solid-motionone';
 import CompactTimetable from '~/components/default_view/Timetable';
 import Timetable from '~/components/timetable_view/Timetable';
 import Cookies from '~/components/Cookies';
+import DateWarningPopup from '~/components/DateWarning';
 
 interface StoredGroup {
   name: string;
@@ -337,6 +338,7 @@ export default function Home() {
         groups={displayGroups()}
         subjects={displaySubjects()}
       />
+      <DateWarningPopup />
     </div>
   );
 }
