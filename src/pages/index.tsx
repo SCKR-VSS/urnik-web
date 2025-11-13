@@ -333,8 +333,11 @@ export default function Home() {
       <EmailModal
         isOpen={mailModalOpen()}
         onClose={() => setMailModalOpen(false)}
-        classId={mode() === 'class' ? displayClassId() : undefined}
-        className={mode() === 'class' ? options()?.classes.find((c: any) => String(c.id) === displayClassId())?.name : undefined}
+        mode={mode()}
+        classId={displayClassId()}
+        className={options()?.classes.find((c: any) => String(c.id) === displayClassId())?.name}
+        professorId={displayProfessorId()}
+        professorName={options()?.professors.find((p: any) => String(p.id) === displayProfessorId())?.name}
         groups={displayGroups()}
         subjects={displaySubjects()}
       />

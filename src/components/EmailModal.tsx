@@ -9,8 +9,11 @@ interface StoredGroup {
 type EmailModalProps = {
     isOpen: boolean;
     onClose: () => void;
+    mode: 'class' | 'professor';
     classId?: string;
     className?: string;
+    professorId?: string;
+    professorName?: string;
     groups: StoredGroup[];
     subjects: string[];
 };
@@ -37,27 +40,43 @@ export default function EmailModal(props: EmailModalProps) {
             setError("Vnesite veljaven email naslov.");
             return;
         }
-        if (!props.classId) {
+
+        if (props.mode === 'class' && !props.classId) {
             setError("Manjka ID razreda.");
             return;
         }
+
+        if (props.mode === 'professor' && !props.professorId) {
+            setError("Manjka ID profesorja.");
+            return;
+        }
+
         setError(null);
         setIsLoading(true);
         setSuccess(false);
 
         try {
-            const groupObj: { [key: string]: number } = {};
-            props.groups.forEach(g => {
-                groupObj[g.name] = g.group;
-            });
+            let url: string;
+            let payload: object;
 
-            const payload = {
-                email: email(),
-                subjects: props.subjects,
-                groups: groupObj
-            };
+            if (props.mode === 'professor') {
+                url = `${import.meta.env.VITE_API_URL}/mailing/professor/subscribe/${props.professorId}`;
+                payload = { email: email() };
+            } else {
+                const groupObj: { [key: string]: number } = {};
+                props.groups.forEach(g => {
+                    groupObj[g.name] = g.group;
+                });
 
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/mailing/subscribe/${props.classId}`, {
+                url = `${import.meta.env.VITE_API_URL}/mailing/subscribe/${props.classId}`;
+                payload = {
+                    email: email(),
+                    subjects: props.subjects,
+                    groups: groupObj
+                };
+            }
+
+            const res = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -70,13 +89,12 @@ export default function EmailModal(props: EmailModalProps) {
 
             setSuccess(true);
             setTimeout(props.onClose, 2000);
-
         } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
+            setError(err.message || "Prišlo je do napake pri prijavi.");
         }
+        setIsLoading(false);
     };
+
 
     return (
         <Presence>
@@ -109,7 +127,7 @@ export default function EmailModal(props: EmailModalProps) {
 
                         <div class="p-6 space-y-4">
                             <p class="text-sm text-gray-300">
-                                Prijavite se na email obvestila za <span class="font-bold text-indigo-400">{props.className}</span> in obveščeni boste o vsaki spremembi urnika.
+                            Prijavite se na email obvestila za <span class="font-bold text-indigo-400">{props.mode === 'class' ? props.className : props.professorName }</span> in obveščeni boste o vsaki spremembi urnika.
                             </p>
                             <div>
                                 <label for="email-input" class="block text-sm font-medium text-gray-400 mb-1">Vaš email:</label>
