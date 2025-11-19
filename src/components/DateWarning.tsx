@@ -23,7 +23,7 @@ export default function DateWarningPopup() {
                                 <div class="ml-3 w-0 flex-1">
                                     <p class="text-sm font-medium text-yellow-300">Opozorilo o datumih</p>
                                     <p class="mt-1 text-sm text-gray-300">
-                                        Po začetku leta 2026 so lahko prikazani časi v urniku napačni.
+                                        V urniku se lahko zgodi, da so zaradi sprememb trenutni datumi napačni.
                                     </p>
                                 </div>
                                 <div class="ml-4 flex flex-shrink-0">

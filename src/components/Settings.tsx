@@ -98,7 +98,13 @@ export default function TopSettings(props: TopSettingsProps) {
                         value={props.selectedWeek}
                         onChange={(e) => props.onWeekChange(e.currentTarget.value)}
                     >
-                        <For each={props.weeks}>{(week) => <option value={week.value}>{week.label}</option>}</For>
+                        <For each={[...props.weeks].sort((a, b) => {
+                            const getTimestamp = (label: string) => {
+                                const match = label.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+                                return match ? new Date(parseInt(match[3]), parseInt(match[2]) - 1, parseInt(match[1])).getTime() : 0;
+                            };
+                            return getTimestamp(a.label) - getTimestamp(b.label);
+                        })}>{(week) => <option value={week.value}>{week.label}</option>}</For>
                     </select>
                 </div>
 

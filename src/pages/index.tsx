@@ -341,7 +341,6 @@ export default function Home() {
         groups={displayGroups()}
         subjects={displaySubjects()}
       />
-      <DateWarningPopup />
     </div>
   );
 }
