@@ -14,7 +14,7 @@ Najprej naložimo vse pakete potrebne za zagon aplikacije s `pnpm i`.
 
 Aplikacijo se zgradi s `pnpm build`, ki naredi statične datoteke v `/dist` direktoriju.
 
-Strežniku moramo povedati, da so tam shranjene statične datoteke, ki jih mora poslati odjemalcu.
+Strežniku moramo povedati, da so tam shranjene statične datoteke, ki jih mora poslati odjemalcu. Zgeneriran je index.html skupaj z `/assets` direktorijem v katerem je koda.
 
 # Prispevki
 Nejc Živic: Izdelava aplikacije
