@@ -27,6 +27,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Set environment variables
+        run: |
+          echo "VITE_API_URL=https://urnik-api.sckr3.si/" >> .env
+          echo "VITE_PUBLIC_URL=https://urnik.sckr3.si/" >> .env
+
       - name: Run build
         run: pnpm build
 
