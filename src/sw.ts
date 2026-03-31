@@ -5,20 +5,18 @@ import { NetworkFirst } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;
 
-if (typeof self.__WB_MANIFEST !== 'undefined') {
-    cleanupOutdatedCaches();
-    precacheAndRoute(self.__WB_MANIFEST);
+cleanupOutdatedCaches();
+precacheAndRoute(self.__WB_MANIFEST);
 
-    registerRoute(
-        ({ url }) => url.pathname.endsWith('/options'),
-        new NetworkFirst({ cacheName: 'api-options', fetchOptions: { credentials: 'same-origin' } })
-    );
+registerRoute(
+    ({ url }) => url.pathname.endsWith('/options'),
+    new NetworkFirst({ cacheName: 'api-options', fetchOptions: { credentials: 'same-origin' } })
+);
 
-    registerRoute(
-        ({ url }) => url.pathname.includes('/timetable/'),
-        new NetworkFirst({ cacheName: 'api-timetable', fetchOptions: { credentials: 'same-origin' } })
-    );
-}
+registerRoute(
+    ({ url }) => url.pathname.includes('/timetable/'),
+    new NetworkFirst({ cacheName: 'api-timetable', fetchOptions: { credentials: 'same-origin' } })
+);
 
 self.addEventListener('push', (event) => {
     if (!event.data) return;
