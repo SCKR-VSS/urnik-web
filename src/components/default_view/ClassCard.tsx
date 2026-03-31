@@ -1,5 +1,5 @@
-import { Show } from "solid-js";
-import { getTimeRange } from "../../lib/time";
+import { Show, createMemo } from "solid-js";
+import { getTimeRange, isClassActive } from "../../lib/time";
 import type { ClassInfo } from "../../types/timetable";
 
 export function darkenColor(color: string, amount: number): string {
@@ -24,10 +24,18 @@ export function darkenColor(color: string, amount: number): string {
 
 type MergedClass = any & { className?: string };
 
-export default function ClassCard(props: { class: MergedClass }) {
+export default function ClassCard(props: { class: MergedClass; isToday?: boolean; currentTime?: Date; isCurrentWeek?: boolean }) {
+    const active = createMemo(() => {
+        if (!props.isToday || !props.currentTime || !props.isCurrentWeek) return false;
+        return isClassActive(props.class.slot, props.class.duration, props.currentTime);
+    });
+
     return (
         <div
-            class="rounded-lg p-3 text-sm text-gray-900"
+            class="rounded-lg p-3 text-sm text-gray-900 transition-all"
+            classList={{
+                "ring-2 ring-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.5)]": active(),
+            }}
             style={{ "background-color": darkenColor(props.class.color, 40) }}
         >
             <div class="flex justify-between items-start mb-2">

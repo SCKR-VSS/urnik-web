@@ -1,6 +1,7 @@
 import { For, Match, Show, Switch } from "solid-js";
 import ExportButton from "./ExportButton";
 import ExportPdfButton from "./ExportPDFButton";
+import PushNotificationButton from "./PushNotificationButton";
 
 type Option = {
     value: string;
@@ -29,6 +30,13 @@ type TopSettingsProps = {
     onMailClick: () => void;
     groups: StoredGroup[];
     subjects: string[];
+    professorId?: string;
+    onWeekPrev: () => void;
+    onWeekNext: () => void;
+    canGoPrev: boolean;
+    canGoNext: boolean;
+    isOnCurrentWeek: boolean;
+    onGoToCurrentWeek: () => void;
 };
 
 export default function TopSettings(props: TopSettingsProps) {
@@ -72,6 +80,14 @@ export default function TopSettings(props: TopSettingsProps) {
                         </svg>
                     </button>
 
+                    <PushNotificationButton
+                        mode={props.mode}
+                        classId={props.selectedClass}
+                        subjects={props.subjects}
+                        groups={props.groups}
+                        professorId={props.professorId}
+                    />
+
                     <Show when={props.mode === 'class'}>
                         <ExportButton
                             week={props.selectedWeek || ''}
@@ -92,20 +108,41 @@ export default function TopSettings(props: TopSettingsProps) {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="week-select" class="block text-sm font-medium text-gray-400 mb-1">Teden</label>
-                    <select
-                        id="week-select"
-                        class="w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border border-gray-500 bg-gray-700 text-white"
-                        value={props.selectedWeek}
-                        onChange={(e) => props.onWeekChange(e.currentTarget.value)}
-                    >
-                        <For each={[...props.weeks].sort((a, b) => {
-                            const getTimestamp = (label: string) => {
-                                const match = label.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
-                                return match ? new Date(parseInt(match[3]), parseInt(match[2]) - 1, parseInt(match[1])).getTime() : 0;
-                            };
-                            return getTimestamp(a.label) - getTimestamp(b.label);
-                        })}>{(week) => <option value={week.value}>{week.label}</option>}</For>
-                    </select>
+                    <div class="flex items-center gap-1.5">
+                        <button
+                            class="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+                            title="Prejšnji teden"
+                            disabled={!props.canGoPrev}
+                            onClick={props.onWeekPrev}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <select
+                            id="week-select"
+                            class="w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border border-gray-500 bg-gray-700 text-white"
+                            value={props.selectedWeek}
+                            onChange={(e) => props.onWeekChange(e.currentTarget.value)}
+                        >
+                            <For each={props.weeks}>{(week) => <option value={week.value}>{week.label}</option>}</For>
+                        </select>
+                        <button
+                            class="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+                            title="Naslednji teden"
+                            disabled={!props.canGoNext}
+                            onClick={props.onWeekNext}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                        <Show when={!props.isOnCurrentWeek}>
+                            <button
+                                class="p-2 rounded-md text-indigo-400 hover:text-white hover:bg-indigo-600 cursor-pointer flex-shrink-0 transition-colors"
+                                title="Nazaj na trenutni teden"
+                                onClick={props.onGoToCurrentWeek}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><circle cx="12" cy="15" r="2"></circle></svg>
+                            </button>
+                        </Show>
+                    </div>
                 </div>
 
                 <div>

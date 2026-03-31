@@ -7,7 +7,7 @@ type MergedClass = any & { className?: string };
 type MergedDay = Omit<Day, 'classes'> & { classes: MergedClass[] };
 type MergedTimetableData = Omit<TimetableData, 'days'> & { days: MergedDay[] };
 
-export default function CompactTimetable(props: { data: TimetableData | TimetableData[] }) {
+export default function CompactTimetable(props: { data: TimetableData | TimetableData[]; currentTime?: Date; isCurrentWeek?: boolean }) {
 
     const mergedData = createMemo((): MergedTimetableData => {
         const data = props.data;
@@ -54,7 +54,7 @@ export default function CompactTimetable(props: { data: TimetableData | Timetabl
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: i() * 0.1, easing: "ease-in-out" }}
                     >
-                        <DayCard day={day} />
+                        <DayCard day={day} currentTime={props.currentTime} isCurrentWeek={props.isCurrentWeek} />
                     </Motion.div>
                 )}
             </For>

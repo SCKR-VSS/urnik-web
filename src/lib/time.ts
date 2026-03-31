@@ -27,3 +27,17 @@ export function getTimeRange(startSlot: number, duration: number): string {
 
     return `${firstSlot.start}-${lastSlot.end}`;
 }
+
+function parseTime(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+}
+
+export function isClassActive(startSlot: number, duration: number, now: Date): boolean {
+    const slot = timeSlots[startSlot - 1];
+    const endSlot = timeSlots[startSlot + duration - 2];
+    if (!slot || !endSlot) return false;
+
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    return nowMinutes >= parseTime(slot.start) && nowMinutes <= parseTime(endSlot.end);
+}

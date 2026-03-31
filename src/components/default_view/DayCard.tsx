@@ -5,7 +5,7 @@ import ClassCard from "./ClassCard";
 type MergedClass = any & { className?: string };
 type MergedDay = Omit<Day, 'classes'> & { classes: MergedClass[] };
 
-export default function DayCard(props: { day: MergedDay }) {
+export default function DayCard(props: { day: MergedDay; currentTime?: Date; isCurrentWeek?: boolean }) {
     const isToday = createMemo(() => {
         const today = new Date();
         const dayMatch = props.day.day.match(/(\d{1,2})\.(\d{1,2})\.?/);
@@ -30,7 +30,14 @@ export default function DayCard(props: { day: MergedDay }) {
             <div class="space-y-3 p-4">
                 <Show when={props.day.classes.length > 0} fallback={<p class="text-gray-400">Ni pouka.</p>}>
                     <For each={props.day.classes}>
-                        {(classItem) => <ClassCard class={classItem} />}
+                        {(classItem) => (
+                            <ClassCard
+                                class={classItem}
+                                isToday={isToday()}
+                                currentTime={props.currentTime}
+                                isCurrentWeek={props.isCurrentWeek}
+                            />
+                        )}
                     </For>
                 </Show>
             </div>

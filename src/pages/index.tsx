@@ -3,13 +3,15 @@ import SettingsModal from '~/components/SettingsModal';
 import EmailModal from '~/components/EmailModal';
 import TopSettings from '~/components/Settings';
 import { createAsync, query } from '@solidjs/router';
-import { createEffect, createSignal, Show, createResource, onMount, Switch, Match } from 'solid-js';
+import { createEffect, createSignal, Show, createResource, onMount, onCleanup, Switch, Match, createMemo } from 'solid-js';
 import { TimetableData } from '~/types/timetable';
-import { Presence } from 'solid-motionone';
+import { Motion, Presence } from 'solid-motionone';
 import CompactTimetable from '~/components/default_view/Timetable';
 import Timetable from '~/components/timetable_view/Timetable';
 import Cookies from '~/components/Cookies';
 import DateWarningPopup from '~/components/DateWarning';
+import { isClassActive } from '~/lib/time';
+import { syncPushSubscription } from '~/lib/push';
 
 interface StoredGroup {
   name: string;
@@ -138,6 +140,67 @@ export default function Home() {
   const [settingsOpen, setSettingsOpen] = createSignal(false);
   const [mailModalOpen, setMailModalOpen] = createSignal(false);
   const [showOnboarding, setShowOnboarding] = createSignal(false);
+  const [navDirection, setNavDirection] = createSignal<-1 | 0 | 1>(0);
+  const [currentTime, setCurrentTime] = createSignal(new Date());
+  let contentRef: HTMLDivElement | undefined;
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  const sortedWeeks = createMemo(() => {
+    const opts = options();
+    if (!opts) return [];
+    return [...opts.weeks]
+      .map((w: any) => ({ ...w, value: String(w.value) }))
+      .sort((a: any, b: any) => {
+        const getTimestamp = (label: string) => {
+          const match = label.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+          return match ? new Date(parseInt(match[3]), parseInt(match[2]) - 1, parseInt(match[1])).getTime() : 0;
+        };
+        return getTimestamp(a.label) - getTimestamp(b.label);
+      });
+  });
+
+  const currentWeekValue = createMemo(() => {
+    const opts = options();
+    if (!opts) return undefined;
+    const cw = opts.weeks.find((w: any) => w.isCurrent);
+    return cw ? String(cw.value) : undefined;
+  });
+
+  const isOnCurrentWeek = createMemo(() => week() === currentWeekValue());
+
+  const navigateWeek = (direction: -1 | 1) => {
+    const weeks = sortedWeeks();
+    if (!weeks.length) return;
+    const currentIdx = weeks.findIndex((w: any) => w.value === week());
+    const nextIdx = currentIdx + direction;
+    if (nextIdx >= 0 && nextIdx < weeks.length) {
+      setNavDirection(direction);
+      setWeek(weeks[nextIdx].value);
+    }
+  };
+
+  const canGoPrev = createMemo(() => {
+    const weeks = sortedWeeks();
+    if (!weeks.length) return false;
+    const idx = weeks.findIndex((w: any) => w.value === week());
+    return idx > 0;
+  });
+
+  const canGoNext = createMemo(() => {
+    const weeks = sortedWeeks();
+    if (!weeks.length) return false;
+    const idx = weeks.findIndex((w: any) => w.value === week());
+    return idx < weeks.length - 1;
+  });
+
+  const goToCurrentWeek = () => {
+    const cw = currentWeekValue();
+    if (cw) {
+      setNavDirection(0);
+      setWeek(cw);
+    }
+  };
 
   onMount(() => {
     const storedMode = getStoredMode();
@@ -160,7 +223,45 @@ export default function Home() {
     if (storedProfessorId) {
       setDisplayProfessorId(storedProfessorId);
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (document.activeElement?.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+      if (settingsOpen() || showOnboarding() || mailModalOpen()) return;
+
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        e.preventDefault();
+        navigateWeek(-1);
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        e.preventDefault();
+        navigateWeek(1);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+
+    onCleanup(() => {
+      document.removeEventListener('keydown', handleKeyDown);
+      clearInterval(timer);
+    });
   });
+
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (timetableType() === 'timetable') return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    const deltaY = e.changedTouches[0].clientY - touchStartY;
+    const minSwipe = 50;
+    if (Math.abs(deltaX) > minSwipe && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+      if (deltaX > 0) navigateWeek(-1);
+      else navigateWeek(1);
+    }
+  };
 
   createEffect(() => {
     const opts = options();
@@ -199,6 +300,14 @@ export default function Home() {
     }
 
     setSettingsOpen(false);
+
+    syncPushSubscription({
+      mode: newSettings.mode,
+      classId: newSettings.classId,
+      professorId: newSettings.professorId,
+      groups: newSettings.groups,
+      subjects: newSettings.subjects,
+    });
   };
 
   const handleOnboardingSave = (newSettings: {
@@ -273,33 +382,53 @@ export default function Home() {
         <TopSettings
           mode={mode()}
           onModeChange={handleModeChange}
-          weeks={options()!.weeks.map((w: any) => ({ ...w, value: String(w.value) }))}
+          weeks={sortedWeeks()}
           classes={options()!.classes.map((c: any) => ({ value: String(c.id), label: c.name }))}
           professors={options()!.professors.map((p: any) => ({ value: String(p.id), label: p.name }))}
           selectedWeek={week()}
           selectedClass={displayClassId()}
           selectedProfessor={displayProfessorId()}
-          onWeekChange={setWeek}
+          onWeekChange={(w) => { setNavDirection(0); setWeek(w); }}
           onClassChange={changeClassId}
           onProfessorChange={changeProfessorId}
           onSettingsClick={() => setSettingsOpen(true)}
           onMailClick={() => setMailModalOpen(true)}
           groups={displayGroups()}
           subjects={displaySubjects()}
+          professorId={displayProfessorId()}
+          onWeekPrev={() => navigateWeek(-1)}
+          onWeekNext={() => navigateWeek(1)}
+          canGoPrev={canGoPrev()}
+          canGoNext={canGoNext()}
+          isOnCurrentWeek={isOnCurrentWeek()}
+          onGoToCurrentWeek={goToCurrentWeek}
         />
       </Show>
 
-      <div id="content" class="mt-6">
+      <div
+        id="content"
+        class="mt-6"
+        ref={contentRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <Presence exitBeforeEnter>
           <Show when={!timetableData.loading && timetableData()} fallback={<p class="text-center">Nalagam urnik...</p>}>
-            <Switch>
-              <Match when={timetableType() === "default"}>
-                <CompactTimetable data={timetableData()!} />
-              </Match>
-              <Match when={timetableType() === "timetable"}>
-                <Timetable data={timetableData()!} />
-              </Match>
-            </Switch>
+            <Motion.div
+              initial={navDirection() !== 0 ? { opacity: 0, x: navDirection() * 60 } : { opacity: 0, y: 20 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              exit={navDirection() !== 0 ? { opacity: 0, x: navDirection() * -60 } : { opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, easing: "ease-out" }}
+            >
+              <Switch>
+                <Match when={timetableType() === "default"}>
+                  <CompactTimetable data={timetableData()!} currentTime={currentTime()} isCurrentWeek={isOnCurrentWeek()} />
+                </Match>
+                <Match when={timetableType() === "timetable"}>
+                  <Timetable data={timetableData()!} />
+                </Match>
+              </Switch>
+            </Motion.div>
           </Show>
         </Presence>
       </div>
