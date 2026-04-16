@@ -32,7 +32,7 @@ self.addEventListener('push', (event) => {
         icon: '/pwa-192x192.svg',
         badge: '/favicon.svg',
         data: { url: payload.url ?? '/' },
-        tag: 'timetable-change',
+        tag: `timetable-${btoa(unescape(encodeURIComponent(payload.body ?? ''))).slice(0, 16)}`,
     };
     event.waitUntil(self.registration.showNotification(title, options));
 });
