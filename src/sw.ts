@@ -30,7 +30,7 @@ self.addEventListener('push', (event) => {
     } catch {
         payload = { body: event.data.text() };
     }
-    const title = payload.title ?? 'VSŠ Kranj Urnik';
+    const title = payload.title ?? 'Urnik VSŠ ŠC Kranj';
     const options: NotificationOptions = {
         body: payload.body ?? 'Urnik se je spremenil.',
         icon: '/pwa-192x192.svg',

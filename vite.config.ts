@@ -22,9 +22,9 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'VSŠ Kranj Urnik',
+        name: 'Urnik VSŠ ŠC Kranj',
         short_name: 'Urnik',
-        description: 'Urnik za VSŠ SCKR Kranj',
+        description: 'Urnik VSŠ ŠC Kranj',
         theme_color: '#0f0f23',
         background_color: '#0f0f23',
         display: 'standalone',

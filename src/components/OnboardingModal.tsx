@@ -122,10 +122,10 @@ export default function OnboardingModal(props: OnboardingModalProps) {
                             <h2 class="text-lg font-bold">Dobrodošli!</h2>
                         </div>
                         <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-                            <p class="text-gray-300">Za začetek izberite, ali želite pregledovati urnik za razred ali profesorja.</p>
+                            <p class="text-gray-300">Za začetek izberite, ali želite pregledovati urnik za razred ali predavatelja.</p>
                             <div class="flex items-center bg-gray-800 rounded-lg p-1 w-full">
                                 <button onClick={() => setMode('class')} class={`w-1/2 py-2 text-sm rounded-md ${mode() === 'class' ? 'bg-indigo-600 text-white' : 'text-gray-300'}`}>Razred</button>
-                                <button onClick={() => setMode('professor')} class={`w-1/2 py-2 text-sm rounded-md ${mode() === 'professor' ? 'bg-indigo-600 text-white' : 'text-gray-300'}`}>Profesor</button>
+                                <button onClick={() => setMode('professor')} class={`w-1/2 py-2 text-sm rounded-md ${mode() === 'professor' ? 'bg-indigo-600 text-white' : 'text-gray-300'}`}>Predavatelj</button>
                             </div>
 
                             <Switch>
@@ -202,10 +202,10 @@ export default function OnboardingModal(props: OnboardingModalProps) {
                                 </Match>
                                 <Match when={mode() === 'professor'}>
                                     <div class="space-y-2">
-                                        <label for="onboardingProfSelect" class="block text-sm font-medium text-gray-400">Profesor:</label>
+                                        <label for="onboardingProfSelect" class="block text-sm font-medium text-gray-400">Predavatelj:</label>
                                         <select id="onboardingProfSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border border-gray-500 bg-gray-700 text-white"
                                             onChange={(e) => setSelectedProfessor(e.currentTarget.value)}>
-                                            <option selected disabled>Izberite profesorja...</option>
+                                            <option selected disabled>Izberite predavatelja...</option>
                                             <For each={props.professors}>{(p) => <option value={p.value}>{p.label}</option>}</For>
                                         </select>
                                     </div>

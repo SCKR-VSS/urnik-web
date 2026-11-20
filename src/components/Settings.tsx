@@ -51,7 +51,7 @@ export default function TopSettings(props: TopSettingsProps) {
                         <line x1="8" y1="2" x2="8" y2="6"></line>
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                    <span class="hidden sm:inline">VSŠ Kranj Urnik</span>
+                    <span class="hidden sm:inline">Urnik VSŠ ŠC Kranj</span>
                     <span class="sm:hidden">Urnik</span>
                 </h1>
 
@@ -159,7 +159,7 @@ export default function TopSettings(props: TopSettingsProps) {
                             </select>
                         </Match>
                         <Match when={props.mode === 'professor'}>
-                            <label for="prof-select" class="block text-sm font-medium text-gray-400 mb-1">Profesor</label>
+                            <label for="prof-select" class="block text-sm font-medium text-gray-400 mb-1">Predavatelj</label>
                             <select
                                 id="prof-select"
                                 class="w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border border-gray-500 bg-gray-700 text-white"

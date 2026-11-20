@@ -47,7 +47,7 @@ export default function EmailModal(props: EmailModalProps) {
         }
 
         if (props.mode === 'professor' && !props.professorId) {
-            setError("Manjka ID profesorja.");
+            setError("Manjka ID predavatelja.");
             return;
         }
 

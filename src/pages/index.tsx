@@ -87,6 +87,7 @@ const setStoredTimetableType = (type: "default" | "timetable") => {
 
 const getOptions = query(async () => {
   const options = await fetch(import.meta.env.VITE_API_URL + "/options");
+  if (!options.ok) throw new Error(`/options failed: ${options.status} ${await options.text()}`);
   return await options.json();
 }, "items");
 
